@@ -1,0 +1,9 @@
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\bin\Debug\netcoreapp3.1\Data.Domain.deps.json
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\bin\Debug\netcoreapp3.1\Data.Domain.dll
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\bin\Debug\netcoreapp3.1\Data.Domain.pdb
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\obj\Debug\netcoreapp3.1\Data.Domain.AssemblyInfoInputs.cache
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\obj\Debug\netcoreapp3.1\Data.Domain.AssemblyInfo.cs
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\obj\Debug\netcoreapp3.1\Data.Domain.dll
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\obj\Debug\netcoreapp3.1\Data.Domain.pdb
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\obj\Debug\netcoreapp3.1\Data.Domain.csproj.CoreCompileInputs.cache
+C:\Users\gcipr\OneDrive\Desktop\DataApi\Data.Domain\obj\Debug\netcoreapp3.1\Data.Domain.csprojAssemblyReference.cache
