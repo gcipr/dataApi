@@ -5,15 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Data.Domain.Concrete;
-using AutoMapper;
-using Data.Web.Utils;
 
 namespace Data.Web
 {
@@ -34,16 +30,6 @@ namespace Data.Web
             services.AddDbContext<EFDbContext>(option =>
                        option.UseSqlServer(Configuration.GetConnectionString("fishtech")));
 
-
-            // Auto Mapper Configurations
-            var mappingConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mappingConfig.CreateMapper();
-
-            services.AddSingleton(mapper);
             services.AddControllers();
         }
 

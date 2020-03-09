@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Data.Domain.Concrete;
-using Data.Domain.Entities;
-using System.Dynamic;
 using System.Collections.Immutable;
-using System.Collections;
+using Data.Domain.Entities;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Data.Web.Controllers
 {
@@ -32,15 +30,18 @@ namespace Data.Web.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetLocations()
         {
-
-            var list = await _context.Locations
-                .Select(x => new {x.Latitude, x.Longitude, x.FishingSpot.Name, x.FishingSpotId, County = ((County)x.FishingSpot.County).ToString() })
+            var locationList = await _context.Locations
+                .Select(x => new {
+                    x.Latitude, 
+                    x.Longitude, 
+                    x.County
+                })
                 .ToListAsync();
-            return list;
+            return locationList;
         }
         
         // GET: locations/latitude/longitude/n
-        [HttpGet("latitude={latitude}/longitude={longitude}/n={n}")]
+        [HttpGet("{latitude}/{longitude}/{n}")]
         public async Task<IEnumerable<object>> GetLocation(double latitude, double longitude, DistanceUnit unit, int n)
         {
             // Created a dictionary to store id of the location and he distance to our location
@@ -48,7 +49,6 @@ namespace Data.Web.Controllers
 
             //Getting a list of Location objects
             var locations = await _context.Locations
-                .Select(x => new { x.Id, x.Latitude, x.Longitude, x.FishingSpot.Name, x.FishingSpotId, County = ((County)x.FishingSpot.County).ToString() })
                 .ToArrayAsync();
 
             // Calculating the distance between our location and all the locations in SQL using haversin mathematical formula
@@ -68,15 +68,10 @@ namespace Data.Web.Controllers
 
             idDistance.OrderBy(d => d.Value);
             var idList = idDistance.Keys.ToArray().Take(n);
-            var renderedLocations = locations.Where(e => idList.Contains(e.Id));
+            var renderedLocations = locations.Where(e => idList.Contains(e.Id)).Select(x => new { x.Latitude, x.Longitude, x.FishingSpotId, x.County });
 
             return renderedLocations;
         }
 
-
-        private bool LocationExists(int id)
-        {
-            return _context.Locations.Any(e => e.Id == id);
-        }
     }
 }

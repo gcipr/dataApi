@@ -16,51 +16,7 @@ namespace Data.Domain.Entities
         public bool Licence { get; set; }
         public Location Locations { get; set; }
         public IEnumerable<Review> Reviews { get; set; }
-        public int County { get; set; }
+        public string FishType { get; set; }
     }
-    public enum County
-    {
-        Alba,
-        Arad,
-        Arges,
-        Bacău,
-        Bihor,
-        Bistriţa,
-        Botoşani,
-        Braşov,
-        Brăila,
-        Bucureşti,
-        Buzău,
-        CarasSeverin,
-        Călăraşi,
-        Cluj,
-        Constanţa,
-        Covasna,
-        Dâmboviţa,
-        Dolj,
-        Galaţi,
-        Giurgiu,
-        Gorj,
-        Harghita,
-        Hunedoara,
-        Ialomiţa,
-        Iaşi,
-        Ilfov,
-        Maramureş,
-        Mehedinţi,
-        Mureş,
-        Neamţ,
-        Olt,
-        Prahova,
-        SatuMare,
-        Sălaj,
-        Sibiu,
-        Suceava,
-        Teleorman,
-        Timiş,
-        Tulcea,
-        Vâlcea,
-        Vaslui,
-        Vrancea
-    }
+   
 }
