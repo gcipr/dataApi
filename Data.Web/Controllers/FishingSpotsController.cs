@@ -6,10 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Data.Domain.Concrete;
 using Data.Domain.Entities;
-using Data.Domain.EntitiesDTO;
-using AutoMapper;
-using Data.Web.Utils;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Data.Web.Controllers
 {
@@ -17,16 +13,14 @@ namespace Data.Web.Controllers
     [ApiController]
     public class FishingSpotsController : ControllerBase
     {
-        // Create a field to store the mapper object
-        private readonly IMapper _mapper;
+
         // Create a field to store Data sets
         private readonly EFDbContext _context;
 
         // Assign the object in the constructor for dependency injection
-        public FishingSpotsController(EFDbContext context, IMapper mapper)
+        public FishingSpotsController(EFDbContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         // GET: api/FishingSpots
@@ -41,7 +35,8 @@ namespace Data.Web.Controllers
                    Url = x.Url, 
                    WaterType = x.WaterType,
                    Administration = x.Administration,
-                   Tax = x.Tax
+                   Tax = x.Tax,
+                   FishType = x.FishType
                })
                 .ToListAsync();
         }
@@ -49,22 +44,23 @@ namespace Data.Web.Controllers
 
         // GET: api/FishingSpots/5
         [HttpGet("{id}")]
-        public async Task<IQueryable<FishingSpotDTO>> GetFishingSpot(int id)
+        public async Task<IEnumerable<FishingSpot>> GetFishingSpot(int id)
         {
             var fishingSpot = await _context.FishingSpots
                 .Where(c => c.Id == id)
-                .Include("Reviews")
                 .Include("Locations")
-                .Select(x => FishingSpotsToDTO(x))
+                .Include("Reviews")
                 .ToListAsync();
 
 
+            
+            
             if (fishingSpot == null)
             {
-                return new List<FishingSpotDTO>().AsQueryable();
+                return new List<FishingSpot>().AsQueryable();
             }
 
-            return fishingSpot.AsQueryable();
+            return fishingSpot;
         }
 
         // PUT: api/FishingSpots/5
@@ -129,22 +125,5 @@ namespace Data.Web.Controllers
         {
             return _context.FishingSpots.Any(e => e.Id == id);
         }
-
-        // Mapping the dbset to the subset DTO
-       private static FishingSpotDTO FishingSpotsToDTO(FishingSpot fishingSpot) => new FishingSpotDTO
-       {
-           Id = fishingSpot.Id,
-           Name = fishingSpot.Name,
-           Licence = fishingSpot.Licence,
-           Description = fishingSpot.Description,
-           Url = fishingSpot.Url,
-           WaterType = fishingSpot.WaterType,
-           Administration = fishingSpot.Administration,
-           Tax = fishingSpot.Tax,
-           LocationsDTO = fishingSpot.Locations,
-           ReviewsDTO = fishingSpot.Reviews
-
-        };
-
     }
 }
