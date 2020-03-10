@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Data.Domain.Concrete;
 using System.Collections.Immutable;
-using Data.Domain.Entities;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Data.Web.Controllers
 {
@@ -17,60 +14,71 @@ namespace Data.Web.Controllers
     {
         private readonly EFDbContext _context;
         public enum DistanceUnit { Miles, Kilometers };
+        Dictionary<int, double> distancelist = new Dictionary<int, double>(); // Created a dictionary to store id of the  
+                                                                              // location and the distance to our location
+
         public LocationsController(EFDbContext context)
         {
             _context = context;
         }
+
+        [HttpGet] // GET: api/Locations
+        public  IQueryable<object> GetLocations()
+        {
+            var F = _context.FishingSpots;
+            var L =  _context.Locations;
+
+            var Locations = from location in L
+                                  join fishingSpot in F on location.FishingSpotId equals fishingSpot.Id
+                                  select new { latitude = location.Latitude, longitude = location.Longitude, county = location.County, name = fishingSpot.Name };
+            return Locations;
+        }
+        
+        [HttpGet("{latitude}/{longitude}/{n}")] // GET: locations/latitude/longitude/n
+        public IQueryable<object> GetLocation(double latitude, double longitude, DistanceUnit unit, int n)
+        {
+            var locations = _context.Locations;
+            distancelist = GetDistance(latitude, longitude, unit, n);
+            distancelist.OrderBy(d => d.Value);
+
+            var keysByDistance = distancelist.Keys.ToArray().Take(n);
+            var locationList = locations.Where(e => keysByDistance.Contains(e.Id)).Select(x => new { x.Latitude, x.Longitude, x.FishingSpotId, x.County });
+            var F = _context.FishingSpots;
+
+            var objectsLocation = from location in locationList
+                                 join fishingSpot in F on location.FishingSpotId equals fishingSpot.Id
+                     select new { latitude = location.Latitude, longitude = location.Longitude, county = location.County, name = fishingSpot.Name };
+
+            return objectsLocation;
+        }
+
+
         private double ToRadians(double val)
         {
             return (Math.PI / 100) * val;
         }
 
-        // GET: api/Locations
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<object>>> GetLocations()
+        // Calculate distance between the main location to all locations in SQL
+        public Dictionary<int, double> GetDistance(double latitude, double longitude, DistanceUnit unit, int n)
         {
-            var locationList = await _context.Locations
-                .Select(x => new {
-                    x.Latitude, 
-                    x.Longitude, 
-                    x.County
-                })
-                .ToListAsync();
-            return locationList;
-        }
-        
-        // GET: locations/latitude/longitude/n
-        [HttpGet("{latitude}/{longitude}/{n}")]
-        public async Task<IEnumerable<object>> GetLocation(double latitude, double longitude, DistanceUnit unit, int n)
-        {
-            // Created a dictionary to store id of the location and he distance to our location
-            Dictionary<int, double> idDistance = new Dictionary<int, double>();
-
             //Getting a list of Location objects
-            var locations = await _context.Locations
-                .ToArrayAsync();
-
+            var locations = _context.Locations.ToArray();
             // Calculating the distance between our location and all the locations in SQL using haversin mathematical formula
-            for (var i=0; i < locations.Length; i++)
+            for (var i = 0; i < locations.Length; i++)
             {
-                 double R = (unit == DistanceUnit.Kilometers) ? 6371 : 3960 ;
-                 var lat = ToRadians((locations[i].Latitude - latitude));
-                 var lng = ToRadians((locations[i].Longitude - longitude));
-                 var h1 = Math.Sin(lat / 2) * Math.Sin(lat / 2) +
-                          Math.Cos(ToRadians(latitude)) * Math.Cos(ToRadians(locations[i].Latitude)) *
-                          Math.Sin(lng / 2) * Math.Sin(lng / 2);
-                 var h2 = 2 * Math.Asin(Math.Min(1, Math.Sqrt(h1)));
-                 var distance = R * h2;
+                double R = (unit == DistanceUnit.Kilometers) ? 6371 : 3960;
+                var lat = ToRadians((locations[i].Latitude - latitude));
+                var lng = ToRadians((locations[i].Longitude - longitude));
+                var h1 = Math.Sin(lat / 2) * Math.Sin(lat / 2) +
+                         Math.Cos(ToRadians(latitude)) * Math.Cos(ToRadians(locations[i].Latitude)) *
+                         Math.Sin(lng / 2) * Math.Sin(lng / 2);
+                var h2 = 2 * Math.Asin(Math.Min(1, Math.Sqrt(h1)));
+                var distance = R * h2;
 
-                idDistance.Add(locations[i].Id, distance);
+                distancelist.Add(locations[i].Id, distance);
             }
 
-            idDistance.OrderBy(d => d.Value);
-            var idList = idDistance.Keys.ToArray().Take(n);
-            var renderedLocations = locations.Where(e => idList.Contains(e.Id)).Select(x => new { x.Latitude, x.Longitude, x.FishingSpotId, x.County });
-
-            return renderedLocations;
+            return distancelist;
         }
 
     }
